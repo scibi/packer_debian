@@ -25,42 +25,42 @@ variable "proxmox_node" {
 }
 
 variable "vm_name" {
-  type = string
+  type    = string
   default = "debian-12.2.0-amd64"
 }
 
 variable "vm_id" {
-  type = number
+  type    = number
   default = 2001
 }
 
 variable "iso_url" {
-  type = string
+  type    = string
   default = "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-12.2.0-amd64-netinst.iso"
 }
 
 variable "iso_checksum" {
-  type = string
+  type    = string
   default = "sha512:11d733d626d1c7d3b20cfcccc516caff2cbc57c81769d56434aab958d4d9b3af59106bc0796252aeefede8353e2582378e08c65e35a36769d5cf673c5444f80e"
 }
 
 variable "iso_storage_pool" {
-  type = string
+  type    = string
   default = "local"
 }
 
 variable "disk_storage_pool" {
-  type = string
+  type    = string
   default = "local-lvm"
 }
 
 variable "cloud_init_storage_pool" {
-  type = string
+  type    = string
   default = "local"
 }
 
 variable "proxy_url" {
-  type = string
+  type    = string
   default = ""
 }
 
@@ -70,7 +70,7 @@ variable "root_password" {
 
 
 variable "net_vlan_id" {
-  type = string
+  type    = string
   default = ""
 }
 
@@ -120,11 +120,11 @@ source "proxmox-iso" "debian-12-template" {
   }
 
   disks {
-    storage_pool      = "${var.disk_storage_pool}"
-    type              = "scsi"
-    disk_size         = "5G"
-    format            = "raw"
-    io_thread         = true
+    storage_pool = "${var.disk_storage_pool}"
+    type         = "scsi"
+    disk_size    = "5G"
+    format       = "raw"
+    io_thread    = true
   }
 
   template_description = "Built from ${basename(var.iso_url)} on ${formatdate("YYYY-MM-DD hh:mm:ss ZZZ", timestamp())}"
@@ -136,15 +136,15 @@ source "proxmox-iso" "debian-12-template" {
     "auto ",
     "net.ifnames=0 ",
     "netcfg/disable_autoconfig=true ",
-    "${var.net_ip_addr!= "" ? format("netcfg/get_ipaddress=%s ",var.net_ip_addr) : ""}",
-    "${var.net_netmask!= "" ? format("netcfg/get_netmask=%s ",var.net_netmask) : ""}",
-    "${var.net_gateway!= "" ? format("netcfg/get_gateway=%s ",var.net_gateway) : ""}",
-    "${var.net_nameservers!= "" ? format("netcfg/get_nameservers=%s ",var.net_nameservers) : ""}",
+    "${var.net_ip_addr != "" ? format("netcfg/get_ipaddress=%s ", var.net_ip_addr) : ""}",
+    "${var.net_netmask != "" ? format("netcfg/get_netmask=%s ", var.net_netmask) : ""}",
+    "${var.net_gateway != "" ? format("netcfg/get_gateway=%s ", var.net_gateway) : ""}",
+    "${var.net_nameservers != "" ? format("netcfg/get_nameservers=%s ", var.net_nameservers) : ""}",
     "netcfg/confirm_static=true ",
-    "${var.proxy_url != "" ? format("http_proxy=%s ",var.proxy_url) : ""}",
+    "${var.proxy_url != "" ? format("http_proxy=%s ", var.proxy_url) : ""}",
     "url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed_bookworm_separate_var_log.cfg<enter>"
   ]
-  boot_wait      = "10s"
+  boot_wait = "10s"
   http_content = {
     "/preseed_bookworm_separate_var_log.cfg" = templatefile("${path.root}/http/preseed_bookworm_separate_var_log.cfg", { proxy = var.proxy_url, root_password = var.root_password })
   }
@@ -157,7 +157,7 @@ source "proxmox-iso" "debian-12-template" {
 
   ssh_password = "${var.root_password}"
   ssh_username = "root"
-  ssh_timeout = "30m"
+  ssh_timeout  = "30m"
 }
 
 # a build block invokes sources and runs provisioning steps on them. The
@@ -173,7 +173,7 @@ build {
 
   provisioner "file" {
     destination = "/etc/network/interfaces"
-    content = <<-EOF
+    content     = <<-EOF
       # This file describes the network interfaces available on your system
       # and how to activate them. For more information, see interfaces(5).
       
