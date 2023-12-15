@@ -64,8 +64,20 @@ variable "proxy_url" {
   default = ""
 }
 
+variable "use_github" {
+  type    = bool
+  default = false
+}
+
+variable "http_interface" {
+  type = string
+  default = "enp88s0"
+}
+
 variable "root_password" {
   type = string
+  # Some random password used only when not using buildin http server
+  default = "ov6SjkaQo7gk"
 }
 
 
@@ -142,7 +154,7 @@ source "proxmox-iso" "debian-12-template" {
     "${var.net_nameservers != "" ? format("netcfg/get_nameservers=%s ", var.net_nameservers) : ""}",
     "netcfg/confirm_static=true ",
     "${var.proxy_url != "" ? format("http_proxy=%s ", var.proxy_url) : ""}",
-    "url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed_bookworm_separate_var_log.cfg<enter>"
+    "url=${var.use_github ? "https://raw.githubusercontent.com/scibi/packer_debian/main/http" : "http://{{ .HTTPIP }}:{{ .HTTPPort }}"}/preseed_bookworm_separate_var_log${var.use_github ? "_pub" : ""}.cfg<enter>"
   ]
   boot_wait = "10s"
   http_content = {
@@ -150,7 +162,7 @@ source "proxmox-iso" "debian-12-template" {
   }
   http_port_min = "8000"
   http_port_max = "8000"
-  #http_interface = "enp88s0"
+  http_interface = "${var.http_interface}"
 
   cloud_init              = true
   cloud_init_storage_pool = "${var.cloud_init_storage_pool}"
