@@ -1,7 +1,7 @@
 packer {
   required_plugins {
     proxmox = {
-      version = " >= 1.1.5"
+      version = " >= 1.1.6"
       source  = "github.com/hashicorp/proxmox"
     }
   }
@@ -9,6 +9,13 @@ packer {
 
 variable "proxmox_api_password" {
   type      = string
+  default = ""
+  sensitive = true
+}
+
+variable "proxmox_api_token" {
+  type      = string
+  default = ""
   sensitive = true
 }
 
@@ -81,6 +88,10 @@ variable "root_password" {
 }
 
 
+variable "net_bridge" {
+  type    = string
+  default = "vmbr0"
+}
 variable "net_vlan_id" {
   type    = string
   default = ""
@@ -103,6 +114,7 @@ source "proxmox-iso" "debian-12-template" {
   proxmox_url = "https://${var.proxmox_host}/api2/json"
   username    = "${var.proxmox_api_user}"
   password    = "${var.proxmox_api_password}"
+  token       = "${var.proxmox_api_token}"
   node        = "${var.proxmox_node}"
 
   insecure_skip_tls_verify = true
@@ -121,11 +133,12 @@ source "proxmox-iso" "debian-12-template" {
   cores    = "2"
   sockets  = "1"
   cpu_type = "host"
+  tags     = "template"
 
   os = "l26"
 
   network_adapters {
-    bridge   = "vmbr0"
+    bridge   = "${var.net_bridge}"
     firewall = false
     model    = "virtio"
     vlan_tag = "${var.net_vlan_id}"
