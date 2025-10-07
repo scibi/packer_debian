@@ -33,22 +33,22 @@ variable "proxmox_node" {
 
 variable "vm_name" {
   type    = string
-  default = "debian-12.2.0-amd64"
+  default = "debian-13.1.0-amd64"
 }
 
 variable "vm_id" {
   type    = number
-  default = 2001
+  default = 2002
 }
 
 variable "iso_url" {
   type    = string
-  default = "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-12.2.0-amd64-netinst.iso"
+  default = "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-13.1.0-amd64-netinst.iso"
 }
 
 variable "iso_checksum" {
   type    = string
-  default = "sha512:11d733d626d1c7d3b20cfcccc516caff2cbc57c81769d56434aab958d4d9b3af59106bc0796252aeefede8353e2582378e08c65e35a36769d5cf673c5444f80e"
+  default = "sha512:873e9aa09a913660b4780e29c02419f8fb91012c8092e49dcfe90ea802e60c82dcd6d7d2beeb92ebca0570c49244eee57a37170f178a27fe1f64a334ee357332"
 }
 
 variable "iso_storage_pool" {
@@ -110,7 +110,7 @@ variable "net_nameservers" {
   type = string
 }
 
-source "proxmox-iso" "debian-12-template" {
+source "proxmox-iso" "debian-13-template" {
   proxmox_url = "https://${var.proxmox_host}/api2/json"
   username    = "${var.proxmox_api_user}"
   password    = "${var.proxmox_api_password}"
@@ -166,14 +166,14 @@ source "proxmox-iso" "debian-12-template" {
     "${var.net_gateway != "" ? format("netcfg/get_gateway=%s ", var.net_gateway) : ""}",
     "${var.net_nameservers != "" ? format("netcfg/get_nameservers=%s ", var.net_nameservers) : ""}",
     "netcfg/confirm_static=true ",
-    "url=${var.use_github ? "https://raw.githubusercontent.com/scibi/packer_debian/main/http" : "http://{{ .HTTPIP }}:{{ .HTTPPort }}"}/preseed_bookworm_separate_var_log${var.use_github ? "_pub" : ""}.cfg ",
+    "url=${var.use_github ? "https://raw.githubusercontent.com/scibi/packer_debian/main/http" : "http://{{ .HTTPIP }}:{{ .HTTPPort }}"}/preseed_trixie_separate_var_log${var.use_github ? "_pub" : ""}.cfg ",
     "${var.use_github && var.proxy_url != "" ? format("http_proxy=%s ", var.proxy_url) : ""}",
 #    "url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
     "--<enter>"
   ]
   boot_wait = "10s"
   http_content = {
-    "/preseed_bookworm_separate_var_log.cfg" = templatefile("${path.root}/http/preseed_bookworm_separate_var_log.cfg", { proxy = var.proxy_url, root_password = var.root_password })
+    "/preseed_trixie_separate_var_log.cfg" = templatefile("${path.root}/http/preseed_trixie_separate_var_log.cfg", { proxy = var.proxy_url, root_password = var.root_password })
   }
   http_port_min = "8000"
   http_port_max = "8000"
@@ -191,7 +191,7 @@ source "proxmox-iso" "debian-12-template" {
 # documentation for build blocks can be found here:
 # https://www.packer.io/docs/templates/hcl_templates/blocks/build
 build {
-  sources = ["source.proxmox-iso.debian-12-template"]
+  sources = ["source.proxmox-iso.debian-13-template"]
 
   provisioner "file" {
     destination = "/etc/cloud/cloud.cfg"
