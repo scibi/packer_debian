@@ -119,9 +119,15 @@ source "proxmox-iso" "debian-12-template" {
 
   insecure_skip_tls_verify = true
 
-  iso_url          = "${var.iso_url}"
-  iso_checksum     = "${var.iso_checksum}"
-  iso_storage_pool = "${var.iso_storage_pool}"
+  boot_iso {
+    type              = "scsi"
+    iso_download_pve  = true
+    iso_url           = "${var.iso_url}"
+    iso_checksum      = "${var.iso_checksum}"
+    iso_storage_pool  = "${var.iso_storage_pool}"
+    unmount = true
+  }
+
 
   vm_name = "${var.vm_name}"
   vm_id   = "${var.vm_id}"
@@ -153,7 +159,6 @@ source "proxmox-iso" "debian-12-template" {
   }
 
   template_description = "Built from ${basename(var.iso_url)} on ${formatdate("YYYY-MM-DD hh:mm:ss ZZZ", timestamp())}"
-  unmount_iso          = true
   scsi_controller      = "virtio-scsi-single"
 
   boot_command = [
@@ -173,7 +178,7 @@ source "proxmox-iso" "debian-12-template" {
   ]
   boot_wait = "10s"
   http_content = {
-    "/preseed_bookworm_separate_var_log.cfg" = templatefile("${path.root}/http/preseed_bookworm_separate_var_log.cfg", { proxy = var.proxy_url, root_password = var.root_password })
+    "/preseed_bookworm_separate_var_log.cfg" = templatefile("${path.root}/http/preseed_bookworm_separate_var_log.cfg", { proxy = "${var.use_github && var.proxy_url != "" ? var.proxy_url : ""}", root_password = var.root_password })
   }
   http_port_min = "8000"
   http_port_max = "8000"
